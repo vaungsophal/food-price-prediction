@@ -203,21 +203,15 @@ s = new("Problem & solution", "An early warning", "only works if it arrives")
 TOP, HEIGHT = Inches(2.4), Inches(3.95)
 PANELS = [
     (MARGIN, Inches(5.5), MANGOSTEEN, "PROBLEM",
-     "A price rise lands hardest on the people with the least slack.",
-     ["For a low-income household food is the largest monthly cost, so a price rise "
-      "is not an inconvenience.",
-      "WFP tracks these markets to catch that early, but publishes what prices were "
-      "— not what they will be.",
-      f"And the record itself ships as a {metrics['raw_rows']:,}-row CSV: readable by "
-      "analysts, nobody else."]),
+     "No simple food-price forecast exists.",
+     ["Prices are public, but hard to use.",
+      "People need warning before prices rise.",
+      "A CSV is not enough for everyday users."]),
     (Inches(6.93), Inches(5.5), PALM, "SOLUTION",
-     "Make the answer reachable in two clicks or one message.",
-     [f"{SERIES_COUNT:,} price series across 46 commodities and 76 markets, charted "
-      "for anyone with a browser.",
-      "A next-period forecast on each, with the line between recorded and predicted "
-      "drawn honestly.",
-      "Free to run — so a ministry, an NGO or a co-op could stand the same thing up "
-      "on its own feed."]),
+     "Make the forecast easy to reach.",
+     [f"46 commodities and 76 markets.",
+      "Choose a food and market.",
+      "See price history, trend and forecast."]),
 ]
 
 for left, width, accent, label, lead, points in PANELS:
@@ -232,7 +226,7 @@ for left, width, accent, label, lead, points in PANELS:
 
     # Each point is written to fit two lines at this measure; the step allows for that
     # plus a gap, so the three of them land inside the card.
-    y = TOP + Inches(1.55)
+    y = TOP + Inches(1.82)
     for point in points:
         box(s, inner, y + Inches(0.07), Inches(0.14), Inches(0.14), fill=accent)
         text(s, point, inner + Inches(0.32), y, inner_w - Inches(0.32), Inches(0.6),
@@ -243,7 +237,7 @@ for left, width, accent, label, lead, points in PANELS:
 text(s, "→", Inches(6.32), Inches(4.05), Inches(0.6), Inches(0.4), font=MONO, size=22,
      color=PALM, align=PP_ALIGN.CENTER)
 
-footnote(s, "A demonstration on a snapshot, not a deployed service — the data ends March 2026 and the app says so, series by series.")
+footnote(s, "Core claim: this project does not invent new food-price data; it makes public data predictive, accessible and honest about uncertainty.")
 
 # 03 — the data --------------------------------------------------------------
 s = new("The data", "Twenty-three years", "of market visits")
@@ -569,215 +563,104 @@ text(s, "19 tests cover the traversal, the fuzzy matching, the commodity/market 
         "and every failure path.", MARGIN, Inches(4.75), Inches(5.5), Inches(0.8),
      size=14, color=INK_SOFT, line=1.45)
 
-# 12 — the app ---------------------------------------------------------------
-s = new("The result", "It runs", "in a browser")
-text(s, "Nuxt 4 on Vercel. The default forecast is server-rendered, so the chart is on "
-        "screen at first paint — no spinner, no empty state.",
-     MARGIN, Inches(2.4), Inches(5.6), Inches(1.2), size=15.5, color=INK, line=1.5)
+# 12 - web app and bot --------------------------------------------------------
+s = new("Product", "A forecast people", "can actually open")
+text(s, "The model is not left in the notebook. Nuxt serves the same prediction engine through a web page, API routes and a Telegram webhook.",
+     MARGIN, Inches(2.35), Inches(6.1), Inches(1.0), size=16, color=INK, line=1.45)
 
 app_facts = [
-    ("Dependent dropdowns", "picking a commodity narrows the markets to those that carry it"),
-    ("Fuzzy input", '"rice" resolves to Rice (mixed, low quality) — shortest match wins'),
-    ("Cached at the edge", "options for a day, forecasts for an hour"),
-    ("Responsive to 390px", "the chart switches to a narrower viewBox, not smaller type"),
+    ("Browser", "Choose a commodity and market, then see the latest price, forecast and chart."),
+    ("API", "/api/predict returns the same forecast for the web UI and outside clients."),
+    ("Telegram", "/predict rice phnom penh gives a fast text answer with a small sparkline."),
+    ("Deployment", "Vercel only receives the Nuxt app and JSON artifacts, not Python ML libraries."),
 ]
-y = Inches(3.7)
+y = Inches(3.65)
 for title, desc in app_facts:
-    text(s, title, MARGIN, y, Inches(5.5), Inches(0.28), size=14, color=INK, bold=True)
-    text(s, desc, MARGIN, y + Inches(0.27), Inches(5.4), Inches(0.4), size=12.5,
+    box(s, MARGIN, y + Inches(0.06), Inches(0.06), Inches(0.48), fill=PALM)
+    text(s, title, MARGIN + Inches(0.3), y, Inches(1.45), Inches(0.3), size=14.5,
+         color=INK, bold=True)
+    text(s, desc, MARGIN + Inches(1.85), y, Inches(4.25), Inches(0.5), size=12.8,
          color=INK_SOFT, line=1.35)
-    y += Inches(0.78)
+    y += Inches(0.72)
 
 hero = ASSETS / "hero.png"
 if hero.exists():
-    s.shapes.add_picture(str(hero), Inches(7.4), Inches(0.5), height=Inches(6.5))
+    s.shapes.add_picture(str(hero), Inches(7.25), Inches(0.6), height=Inches(6.25))
 
-# 13 — the chart decision ----------------------------------------------------
-s = new("Design decision", "Where the record ends", "must be unmistakable")
+footnote(s, "One trained model, one TypeScript engine, two user-facing surfaces.")
+
+# 13 - chart honesty ----------------------------------------------------------
+s = new("Design choice", "The forecast must", "look different")
 chart = ASSETS / "chart_card.png"
 if chart.exists():
-    s.shapes.add_picture(str(chart), MARGIN, Inches(2.4), width=Inches(7.3))
+    s.shapes.add_picture(str(chart), MARGIN, Inches(2.35), width=Inches(7.2))
 
-text(s, "A charting library would draw the forecast as the next point on the same line. "
-        "That is a lie of omission: it renders a model estimate with exactly the same "
-        "authority as a recorded observation.",
-     Inches(8.7), Inches(2.4), Inches(3.7), Inches(1.8), size=14.5, color=INK, line=1.5)
+text(s, "A normal line chart can accidentally overpromise. If the predicted point looks exactly like a real observation, the audience reads it as fact.",
+     Inches(8.55), Inches(2.35), Inches(3.85), Inches(1.2), size=15, color=INK, line=1.45)
 
-legend = [("Solid green", "prices actually recorded", PALM),
-          ("Dashed amber", "the model's estimate, rising", TURMERIC_DEEP),
-          ("Dashed red", "the model's estimate, falling", MANGOSTEEN),
-          ("Hollow ring", "not an observation", INK_SOFT)]
-y = Inches(4.25)
+legend = [
+    ("Solid green", "prices actually recorded", PALM),
+    ("Dashed segment", "model estimate", TURMERIC_DEEP),
+    ("Hollow ring", "not an observed price", INK_SOFT),
+    ("Stale warning", "shown when the latest real data is old", MANGOSTEEN),
+]
+y = Inches(4.05)
 for title, desc, colour in legend:
-    box(s, Inches(8.7), y + Inches(0.07), Inches(0.16), Inches(0.16), fill=colour)
-    text(s, title, Inches(9.0), y, Inches(3.4), Inches(0.28), size=13, color=INK,
-         bold=True)
-    text(s, desc, Inches(9.0), y + Inches(0.25), Inches(3.4), Inches(0.28), size=12,
+    box(s, Inches(8.55), y + Inches(0.08), Inches(0.16), Inches(0.16), fill=colour)
+    text(s, title, Inches(8.85), y, Inches(3.5), Inches(0.28), size=13.5, color=INK, bold=True)
+    text(s, desc, Inches(8.85), y + Inches(0.26), Inches(3.45), Inches(0.3), size=12.2,
          color=INK_SOFT)
-    y += Inches(0.6)
+    y += Inches(0.66)
 
-footnote(s, "Hand-rolled SVG — about 200 lines, no charting library.")
+footnote(s, "The visual design protects the user from confusing an estimate with official market data.")
 
-# 14 — forecast horizon ------------------------------------------------------
-# The obvious challenge from an examiner: the data stops in March 2026, so what does
-# "next period" even mean? This slide answers it with the real distribution rather
-# than letting the question hang.
-s = new("Forecast horizon", "One period past the record,", "not one month past today")
+# 14 - limits and next steps --------------------------------------------------
+s = new("Limits", "Strong result,", "clear next step")
+text(s, "The model performs well, but the honest boundary is important: it forecasts from recent prices, so shocks and stale series remain hard.",
+     MARGIN, Inches(2.35), Inches(11.0), Inches(0.75), size=15.5, color=INK, line=1.4)
 
-recency = {"2026-03 — still reporting": 0, "2025 — recently stopped": 0,
-           "2024 or earlier — stale": 0}
-for by_market in HISTORY.values():
-    for by_type in by_market.values():
-        for series in by_type.values():
-            end = series["dates"][-1]
-            key = ("2026-03 — still reporting" if end >= "2026-01"
-                   else "2025 — recently stopped" if end >= "2025-01"
-                   else "2024 or earlier — stale")
-            recency[key] += 1
-total_series = sum(recency.values())
-
-text(s, "The model forecasts one reporting period past each series' own last "
-        "observation — not one month past today. Series stopped reporting at very "
-        "different times, so that date differs for every commodity and market.",
-     MARGIN, Inches(2.45), Inches(5.6), Inches(1.6), size=16, color=INK, line=1.5)
-
-text(s, f"LAST OBSERVATION ACROSS {total_series:,} SERVED SERIES", MARGIN, Inches(4.15),
-     Inches(5.6), Inches(0.3), font=MONO, size=10, color=INK_SOFT, spacing=1.6)
-
-y = Inches(4.55)
-bar_scale = Inches(3.1)
-for label, count in recency.items():
-    share = count / total_series
-    colour = PALM if "still" in label else TURMERIC_DEEP if "recently" in label else MANGOSTEEN
-    box(s, MARGIN, y, Emu(int(bar_scale * share)), Inches(0.22), fill=colour)
-    text(s, f"{share * 100:.0f}%", MARGIN + Inches(0.1) + Emu(int(bar_scale * share)),
-         y - Inches(0.03), Inches(0.7), Inches(0.3), font=MONO, size=11.5, color=colour,
-         bold=True)
-    text(s, f"{label}  ·  {count:,}", MARGIN, y + Inches(0.26), Inches(5.4),
-         Inches(0.3), size=12.5, color=INK_SOFT)
-    y += Inches(0.72)
-
-card(s, Inches(6.93), Inches(2.4), Inches(5.5), Inches(3.95), accent=PALM)
-text(s, "SO IS IT ACTUALLY FORECASTING?", Inches(7.33), Inches(2.72), Inches(4.7),
-     Inches(0.3), font=MONO, size=10, color=PALM, spacing=1.6)
-text(s, [("Yes — and that is what the test period measures.",
-          {"size": 19, "font": DISPLAY, "bold": True, "color": INK, "space_after": 12}),
-         (f"Training stopped at {metrics['split']}; all {metrics['n_test']:,} test rows "
-          "fall after it. The model was scored on dates it had never seen — a real "
-          "out-of-sample forecast.", {"size": 13.5, "color": INK_SOFT,
-                                      "space_after": 12}),
-         ("What it cannot do is forecast today from a series that went quiet in 2022 — "
-          "and the app prints the real date rather than hiding it.",
-          {"size": 13.5, "color": INK_SOFT})],
-     Inches(7.33), Inches(3.2), Inches(4.7), Inches(2.9), line=1.4)
-
-footnote(s, "Rice at Phnom Penh, wholesale: last recorded June 2022, so the app labels its forecast July 2022 — not next month.")
-
-# 15 — telegram --------------------------------------------------------------
-s = new("Second surface", "The same engine,", "in a chat window")
-text(s, "One prediction engine, two front doors. The bot shares the exact code the web "
-        "app calls — a Telegram update in, a formatted forecast out.",
-     MARGIN, Inches(2.4), Inches(5.9), Inches(1.0), size=15.5, color=INK, line=1.5)
-
-bot_facts = [
-    ("Reply in the response body", "the webhook returns the sendMessage call itself — no "
-                                   "outbound request, and the bot token never reaches Vercel"),
-    ("Always HTTP 200", "a non-2xx makes Telegram retry the same update forever"),
-    ("Sparkline in Unicode blocks", "the only chart a chat window can render inline"),
+items = [
+    ("What works", f"R2 = {xgb['r2']:.3f}; average error about ${xgb['mae']:.3f} on held-out prices."),
+    ("What is missing", "Fuel cost, rainfall, import pressure, holidays and local shocks are not in the model."),
+    ("What I would add", "Prediction intervals, external economic/weather features and scheduled monthly retraining."),
 ]
-y = Inches(3.85)
-for title, desc in bot_facts:
-    text(s, title, MARGIN, y, Inches(5.8), Inches(0.28), size=14, color=INK, bold=True)
-    text(s, desc, MARGIN, y + Inches(0.27), Inches(5.7), Inches(0.6), size=12.5,
-         color=INK_SOFT, line=1.35)
-    y += Inches(0.92)
+y = Inches(3.35)
+for title, desc in items:
+    card(s, MARGIN, y, COL, Inches(0.88), accent=PALM if title == "What works" else TURMERIC_DEEP if title == "What I would add" else MANGOSTEEN)
+    text(s, title.upper(), MARGIN + Inches(0.35), y + Inches(0.2), Inches(2.5), Inches(0.3),
+         font=MONO, size=10, color=INK_SOFT, spacing=1.4)
+    text(s, desc, MARGIN + Inches(2.95), y + Inches(0.17), Inches(8.2), Inches(0.45),
+         size=14, color=INK, line=1.25)
+    y += Inches(1.05)
 
-card(s, Inches(7.4), Inches(2.35), Inches(5.0), Inches(4.0), accent=PALM)
-text(s, "/predict rice phnom penh", Inches(7.75), Inches(2.7), Inches(4.4), Inches(0.3),
-     font=MONO, size=13, color=PALM, bold=True)
-rule(s, Inches(7.75), Inches(3.08), Inches(4.3), BASKET_DEEP)
-reply = [
-    ("Rice (mixed, low quality)", 14, INK, True),
-    ("Phnom Penh, Phnom Penh · Wholesale", 11.5, INK_SOFT, False),
-    ("", 6, INK, False),
-    ("Last recorded (2022-06): $0.440 / KG", 11.5, INK, False),
-    ("Next period forecast: $0.461", 11.5, INK, False),
-    ("▲ +4.8%", 12.5, TURMERIC_DEEP, True),
-    ("", 6, INK, False),
-    ("▁▃▁▁▁▁▂▂▂▁▂▂▁▇▇▇▁▇▁▇▇▇█▇", 13, PALM, False),
-    ("2020-05 → 2022-06, 24 observations", 10.5, INK_SOFT, False),
-]
-y = Inches(3.25)
-for line_text, size, colour, bold in reply:
-    if line_text:
-        text(s, line_text, Inches(7.75), y, Inches(4.4), Inches(0.3), font=MONO,
-             size=size, color=colour, bold=bold)
-    y += Inches(size / 72 * 1.9)
+footnote(s, "This is a credible forecasting prototype, not a replacement for field data or official price monitoring.")
 
-# 16 — limitations -----------------------------------------------------------
-s = new("Limitations", "What this model", "cannot do")
-limits = [
-    ("One period ahead, and no further", "Every feature is a recent price. Feed the "
-     "model its own output and error compounds fast — there is no multi-step forecast here."),
-    ("It cannot see shocks coming", "Fuel costs, export bans, floods, festival demand. "
-     "None are in the feature set, and they are exactly what moves prices sharply."),
-    ("Stale series forecast from stale prices", "A series last reported in 2022 gets a "
-     "2022-shaped answer. Honest, but not useful for today."),
-    ("No uncertainty interval", "A single number, not a range. The dashed line signals "
-     "doubt visually, but does not quantify it."),
-]
-y = Inches(2.5)
-for title, desc in limits:
-    box(s, MARGIN, y + Inches(0.06), Inches(0.05), Inches(0.6), fill=MANGOSTEEN)
-    text(s, title, MARGIN + Inches(0.3), y, Inches(11.0), Inches(0.3), size=15.5,
-         color=INK, bold=True)
-    text(s, desc, MARGIN + Inches(0.3), y + Inches(0.33), Inches(10.6), Inches(0.5),
-         size=13.5, color=INK_SOFT, line=1.4)
-    y += Inches(1.12)
-
-# 17 — next steps ------------------------------------------------------------
-s = new("If I kept going", "Three things", "I would add next")
-nexts = [
-    ("Prediction intervals", "Quantile regression at 10/90 to turn the dashed line into "
-     "a shaded band — the honest version of the same signal."),
-    ("Exogenous features", "Fuel price, rainfall, and the lunar calendar for festival "
-     "demand. The categorical features contribute two percent; these might not."),
-    ("Retraining on a schedule", "The export script already runs headless. A monthly job "
-     "against the live HDX feed would keep every series current."),
-]
-x = MARGIN
-for title, desc in nexts:
-    card(s, x, Inches(2.5), Inches(3.6), Inches(3.2), accent=PALM)
-    text(s, title, x + Inches(0.4), Inches(2.9), Inches(2.9), Inches(0.7), font=DISPLAY,
-         size=19, color=INK, bold=True, line=1.15)
-    text(s, desc, x + Inches(0.4), Inches(3.85), Inches(2.85), Inches(1.6), size=13.5,
-         color=INK_SOFT, line=1.45)
-    x += Inches(3.85)
-
-# 18 — close -----------------------------------------------------------------
+# 15 - close ------------------------------------------------------------------
 s = slide(BASKET)
-text(s, "THANK YOU", MARGIN, Inches(1.6), COL, Inches(0.3), font=MONO, size=11,
-     color=PALM, spacing=2.6)
-text(s, "Questions", MARGIN, Inches(2.15), COL, Inches(1.1), font=DISPLAY, size=58,
-     color=INK, bold=True, line=1.0)
-text(s, "welcome", MARGIN, Inches(3.05), COL, Inches(1.1), font=DISPLAY, size=58,
-     color=PALM, italic=True, line=1.0)
-rule(s, MARGIN, Inches(4.4), Inches(3.2), PALM_LIGHT, 1.5)
+text(s, "FINAL TAKEAWAY", MARGIN, Inches(1.35), COL, Inches(0.3), font=MONO, size=11,
+     color=PALM, spacing=2.4)
+text(s, "Public data becomes useful", MARGIN, Inches(1.9), COL, Inches(0.9),
+     font=DISPLAY, size=50, color=INK, bold=True, line=1.05)
+text(s, "when it answers tomorrow", MARGIN, Inches(2.72), COL, Inches(0.9),
+     font=DISPLAY, size=50, color=PALM, italic=True, line=1.05)
+rule(s, MARGIN, Inches(3.85), Inches(3.2), PALM_LIGHT, 1.5)
+text(s, "Cambodia already has valuable food-price records. This project shows how AI can turn those records into a small, explainable forecasting tool that ordinary users can reach from a browser or chat message.",
+     MARGIN, Inches(4.25), Inches(8.6), Inches(1.25), size=18, color=INK, line=1.45)
 
 stack = [
-    ("Data", "WFP Global Food Prices — Cambodia"),
-    ("Model", "XGBoost · 400 trees · scikit-learn pipeline"),
-    ("Runtime", "Nuxt 4 · Nitro · TypeScript tree traversal"),
-    ("Surfaces", "Web app · Telegram bot · one shared engine"),
+    ("Data", "WFP Cambodia food prices"),
+    ("Model", "XGBoost regression, tested chronologically"),
+    ("Product", "Nuxt app, API and Telegram bot"),
 ]
-y = Inches(4.8)
+y = Inches(5.75)
 for label, value in stack:
-    text(s, label.upper(), MARGIN, y, Inches(1.4), Inches(0.3), font=MONO, size=10,
+    text(s, label.upper(), MARGIN, y, Inches(1.25), Inches(0.3), font=MONO, size=10,
          color=INK_SOFT, spacing=1.4)
-    text(s, value, MARGIN + Inches(1.7), y - Inches(0.03), Inches(8.0), Inches(0.32),
-         size=14, color=INK)
-    y += Inches(0.45)
+    text(s, value, MARGIN + Inches(1.55), y - Inches(0.03), Inches(6.0), Inches(0.32),
+         size=13.5, color=INK)
+    y += Inches(0.4)
+number(s, 15)
 
 prs.save(str(OUT))
-print(f"wrote {OUT.name}  ·  {len(prs.slides.__iter__.__self__._sldIdLst)} slides  ·  "
+print(f"wrote {OUT.name}  -  {len(prs.slides.__iter__.__self__._sldIdLst)} slides  -  "
       f"{OUT.stat().st_size / 1024:.0f} KB")
