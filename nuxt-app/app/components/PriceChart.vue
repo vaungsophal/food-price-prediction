@@ -193,18 +193,15 @@ const formatTick = (value: number) => (value >= 10 ? value.toFixed(1) : value.to
         :stroke-width="box.stroke"
       />
 
-      <!-- Axis: only the two ends of the record, plus the forecast period. -->
+      <!--
+        Axis carries the two ends of the visible range. The last recorded month can't go
+        here too: the final observation sits within about 25px of the forecast point, so a
+        third label on this row lands on top of the amber one. It annotates the boundary
+        rule instead, where there is nothing to collide with.
+      -->
       <g class="mono" :font-size="box.label" fill="var(--ink-soft)">
         <text :x="box.left" :y="geometry.baseline + box.label + 8" text-anchor="start">
           {{ monthLabel(props.dates[0] ?? '') }}
-        </text>
-        <text
-          :x="geometry.lastPoint.x"
-          :y="geometry.baseline + box.label + 8"
-          text-anchor="middle"
-          fill="var(--ink)"
-        >
-          {{ monthLabel(props.dates[props.dates.length - 1] ?? '') }}
         </text>
         <text
           :x="box.w - box.right"
@@ -213,6 +210,14 @@ const formatTick = (value: number) => (value >= 10 ? value.toFixed(1) : value.to
           :fill="forecastColor"
         >
           {{ forecastLabel }}
+        </text>
+        <text
+          :x="geometry.lastPoint.x - 6"
+          :y="box.top - 5"
+          text-anchor="end"
+          fill="var(--ink)"
+        >
+          {{ monthLabel(props.dates[props.dates.length - 1] ?? '') }}
         </text>
       </g>
     </svg>
