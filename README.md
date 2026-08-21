@@ -1,202 +1,246 @@
-# 🇰🇭 Cambodia Food Price Prediction
+# Cambodia Food Price Prediction
 
-An **AI/ML university project** that predicts future food prices in Cambodia using historical food-price data.
+An AI/ML university project that predicts Cambodia food prices from historical World Food Programme market data.
 
-The project trains machine-learning models on Cambodia's food-price dataset and provides predictions through a **Vue 3 web application** and a **Telegram Bot**.
+The project includes:
 
-## 🎯 Project Goal
+- A Python notebook for data cleaning, feature engineering, model training, and evaluation
+- A trained XGBoost regression model
+- A Nuxt 4 web app with API routes
+- A Telegram bot webhook that uses the same prediction engine
 
-The goal is to study historical food prices in Cambodia and build a machine-learning model that can predict future prices based on factors such as:
+## Project Goal
 
-* Commodity
-* Market/location
-* Month and year
-* Previous prices
-* Historical price trends
+The goal is to forecast food prices for a selected commodity and market in Cambodia using:
+
+- Commodity
+- Market/location
+- Price type
+- Month and quarter
+- Previous prices
+- Recent price trend features
 
 Example:
 
 ```text
-Commodity: Rice
+Commodity: Rice (mixed, low quality)
 Market: Phnom Penh
-Prediction: Next Month
+Prediction: Next month
 
-Predicted Price:
-3,150 KHR/kg
+Predicted price:
+$0.46 per unit
 ```
 
-## 📊 Dataset
+## Dataset
 
-Dataset used in this project:
+Dataset file:
 
 **WFP Food Prices for Cambodia**
 
 https://data.humdata.org/dataset/wfp-food-prices-for-cambodia
 
-The dataset contains historical food-price records for different commodities and markets in Cambodia.
+Local CSV:
 
-## 🤖 Machine Learning
+```text
+data/wfp_food_prices_khm.csv
+```
 
-The project explores and compares regression models such as:
+The dataset contains historical food price records for different commodities, markets, provinces, price types, and dates in Cambodia.
 
-* Linear Regression
-* Decision Tree
-* Random Forest
-* XGBoost
+## Machine Learning
 
-Model performance is evaluated using:
+This is a regression problem, so model performance is reported with regression metrics, not classification accuracy.
 
-* MAE
-* RMSE
-* R²
-* MAPE
+The notebook compares:
 
-The best-performing model will be used for prediction.
+- Naive baseline: predict that the next price equals the previous price
+- Random Forest
+- XGBoost
 
-## 🧠 ML Workflow
+Current saved benchmark:
+
+| Model | MAE USD | RMSE USD | R2 |
+|---|---:|---:|---:|
+| Naive baseline | 0.1799 | 0.4088 | 0.9239 |
+| Random Forest | 0.1690 | 0.3352 | 0.9489 |
+| XGBoost final model | 0.1641 | 0.3303 | 0.9504 |
+
+The final XGBoost model has an average error of about **$0.16** and explains about **95%** of the variation in the held-out test data.
+
+## Forecast Horizon Benchmark
+
+The notebook also includes a 1-12 month benchmark section. This compares how the saved model performs when predicting 1 month ahead, 2 months ahead, and so on up to 12 months ahead.
+
+This matters because a model can perform well for the next period but become less reliable as the forecast horizon gets longer.
+
+The current 1-12 month benchmark shows errors around **$0.20 per unit**, with R2 usually above **0.93**.
+
+## ML Workflow
 
 ```text
 WFP Cambodia Dataset
-        ↓
+        |
+        v
 Data Cleaning
-        ↓
-Exploratory Data Analysis
-        ↓
+        |
+        v
 Feature Engineering
-        ↓
-Model Training
-        ↓
+        |
+        v
+Time-Based Train/Test Split
+        |
+        v
+Baseline, Random Forest, XGBoost
+        |
+        v
 Model Evaluation
-        ↓
-Best Model
-        ↓
-Prediction API
+        |
+        v
+Export Model Artifacts
+        |
+        v
+Nuxt API + Web App + Telegram Bot
 ```
 
-## 🌐 Web Application
+## Model Artifacts
 
-The frontend will be built using:
+The notebook saves Python pickle files in:
 
-* Vue 3
-* TypeScript
-* Vite
-* Chart.js
+```text
+model_artifacts/model_artifacts/
+```
 
-The web application will allow users to:
+Important files:
 
-* Predict food prices
-* View historical prices
-* View price trend charts
-* Compare commodities and markets
+```text
+price_model.pkl
+encoders.pkl
+feature_cols.pkl
+```
 
-## 🤖 Telegram Bot
+The Nuxt app does not load these pickle files directly. Instead, `tools/export_artifacts.py` converts them into JSON files:
 
-A Telegram Bot will also provide quick food-price predictions.
+```text
+nuxt-app/server/assets/artifacts/model.json
+nuxt-app/server/assets/artifacts/encoders.json
+nuxt-app/server/assets/artifacts/feature_cols.json
+nuxt-app/server/assets/artifacts/history.json
+```
+
+Those JSON files are what the deployed app uses on Vercel.
+
+## Web Application
+
+The deployed app is built with:
+
+- Nuxt 4
+- Vue 3
+- TypeScript
+- Nitro server routes
+- Hand-built SVG chart
+- Vercel deployment
+
+The app supports:
+
+- Commodity and market selection
+- Price forecast
+- Historical price chart
+- Clear warning when the latest data for a series is old
+- API routes for web and Telegram usage
+
+## Telegram Bot
+
+The Telegram bot uses the Nuxt API webhook route.
+
+Commands include:
+
+```text
+/start
+/help
+/predict <commodity> <market>
+/commodities
+/markets
+```
 
 Example:
 
 ```text
-/predict
-
-🍚 Food: Rice
-📍 Market: Phnom Penh
-
-Predicted Price:
-3,150 KHR/kg
-
-Expected Change:
-+5%
+/predict rice phnom penh
 ```
 
-Telegram will communicate with the system using a **webhook API**.
+## Run the Nuxt App
 
-## 🛠 Tech Stack
+Deploy or run from the `nuxt-app` folder:
 
-**Machine Learning**
+```bash
+cd nuxt-app
+npm install
+npm run dev
+```
+
+For Vercel, set the project root directory to:
 
 ```text
-Python
-Pandas
-NumPy
-Scikit-learn
-XGBoost
-Matplotlib
+nuxt-app
 ```
 
-**Application**
+## Testing
 
-```text
-Vue 3
-TypeScript
-Chart.js
-Telegram Bot API
-Vercel
+From `nuxt-app`:
+
+```bash
+npm test
 ```
 
-## 📓 Google Colab
+The test suite checks that the TypeScript prediction engine matches the Python model's prediction for a known reference case.
 
-Model development and experimentation:
-
-[Open Cambodia Food Price Prediction Notebook](https://colab.research.google.com/drive/1OsfsIQ0qliCN1_lxWhTuA2CxgxoR2Bi8?authuser=1#scrollTo=fbfd984f)
-
-## 💻 GitHub Repository
-
-https://github.com/vaungsophal/food-price-prediction
-
-## 📁 Current Project Files
+## Current Project Structure
 
 ```text
 food-price-prediction/
-│
-├── cambodia_food_price_prediction.ipynb
-├── wfp_food_prices_khm.csv
-└── README.md
+|
+|-- data/
+|   |-- wfp_food_prices_khm.csv
+|-- notebooks/
+|   |-- cambodia_food_price_prediction.ipynb
+|-- reports/
+|   |-- Cambodia_Food_Price_Forecast.pdf
+|   |-- Cambodia_Food_Price_Forecast.pptx
+|-- docs/
+|   |-- prompt.md
+|-- model_artifacts/
+|   |-- model_artifacts/
+|   |   |-- price_model.pkl
+|   |   |-- encoders.pkl
+|   |   |-- feature_cols.pkl
+|   |-- model_artifacts.zip
+|-- tools/
+|   |-- build_slides.py
+|   |-- export_artifacts.py
+|   |-- metrics.json
+|-- nuxt-app/
+|   |-- app/
+|   |-- server/
+|   |   |-- api/
+|   |   |-- assets/artifacts/
+|   |   |-- utils/
+|   |-- test/
+|   |-- package.json
+|-- README.md
 ```
 
-Future structure:
+## Course Context
 
 ```text
-food-price-prediction/
-│
-├── data/
-├── notebooks/
-├── training/
-├── models/
-├── src/                 # Vue 3
-├── api/
-│   ├── predict.ts
-│   ├── history.ts
-│   └── telegram/
-│       └── webhook.ts
-└── README.md
+Course: Artificial Intelligence
+Project: Cambodia Food Price Prediction
+AI Task: Regression / time-series style forecasting
+Dataset: WFP Cambodia Food Prices
+Frontend: Nuxt 4 / Vue 3
+Bot: Telegram webhook
+Deployment: Vercel
 ```
 
-## 🚀 Final Architecture
+## Disclaimer
 
-```text
-Cambodia Food Price Dataset
-          ↓
-     Python Training
-          ↓
-    Trained ML Model
-          ↓
-     Prediction API
-        ↙       ↘
-   Vue 3       Telegram
- Dashboard       Bot
-```
-
-## 🎓 Course Context
-
-**Course:** Artificial Intelligence
-**Project:** Cambodia Food Price Prediction
-**AI Task:** Regression / Time-Series Prediction
-**Dataset:** WFP Cambodia Food Prices
-**Frontend:** Vue 3
-**Bot:** Telegram
-**Deployment:** Vercel
-
-## ⚠️ Disclaimer
-
-Predictions are estimates generated from historical data and machine-learning models. They should not be considered official market prices.
-
+Predictions are model estimates based on historical data. They are not official market prices. If a commodity-market series has old data, the forecast should be treated as less reliable.

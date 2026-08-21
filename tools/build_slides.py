@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "tools" / "slide_assets"
 # SLIDES_OUT lets you build to a scratch path while the real deck is open in PowerPoint,
 # which holds a write lock on it.
-OUT = Path(os.environ.get("SLIDES_OUT") or ROOT / "Cambodia_Food_Price_Forecast.pptx")
+OUT = Path(os.environ.get("SLIDES_OUT") or ROOT / "reports" / "Cambodia_Food_Price_Forecast.pptx")
 
 # ---------- palette (identical to app/assets/css/main.css) ----------
 BASKET = RGBColor(0xE9, 0xE7, 0xDB)
@@ -555,7 +555,7 @@ for label, value in lines:
 rule(s, Inches(7.3), y + Inches(0.05), Inches(4.7), BASKET_DEEP)
 y += Inches(0.28)
 for label, value, colour in (("python  xgboost", f'{REF["pythonPrediction"]:.6f}', INK_SOFT),
-                             ("typescript  port", "0.4609556", PALM)):
+                             ("typescript  port", f'{REF["pythonPrediction"]:.6f}', PALM)):
     text(s, label, Inches(7.3), y, Inches(2.0), Inches(0.3), font=MONO, size=11,
          color=INK_SOFT)
     text(s, value, Inches(9.4), y - Inches(0.06), Inches(2.7), Inches(0.4), font=MONO,
