@@ -414,32 +414,41 @@ text(s, "A notebook that only runs in Colab isn't a product. Deploying to Vercel
         "tier meant meeting a hard limit: 250 MB unzipped per serverless function.",
      MARGIN, Inches(2.4), Inches(11.0), Inches(0.8), size=16, color=INK, line=1.5)
 
+# Bars share one scale so the total genuinely overshoots the limit line rather than
+# being drawn to fit. 360 MB spans the plot, which keeps 327 MB on the slide.
 libs = [("xgboost", 84), ("scipy", 111), ("numpy", 58), ("pandas", 42), ("scikit-learn", 32)]
-y = Inches(3.5)
-scale = Inches(0.038)
+BAR_X = MARGIN + Inches(1.8)
+PLOT_W = Inches(9.6)
+scale = PLOT_W / 360.0
+LIMIT_X = BAR_X + Emu(int(scale * 250))
+
+y = Inches(3.55)
 for name, mb in libs:
     text(s, name, MARGIN, y - Inches(0.02), Inches(1.6), Inches(0.3), font=MONO,
          size=12, color=INK, align=PP_ALIGN.RIGHT)
-    box(s, MARGIN + Inches(1.8), y, Emu(int(scale * mb)), Inches(0.26), fill=MANGOSTEEN)
-    text(s, f"{mb} MB", MARGIN + Inches(1.9) + Emu(int(scale * mb)), y - Inches(0.02),
+    box(s, BAR_X, y, Emu(int(scale * mb)), Inches(0.24), fill=BASKET_DEEP)
+    text(s, f"{mb} MB", BAR_X + Inches(0.1) + Emu(int(scale * mb)), y - Inches(0.03),
          Inches(1.0), Inches(0.3), font=MONO, size=11, color=INK_SOFT)
-    y += Inches(0.42)
+    y += Inches(0.4)
 
-rule(s, MARGIN + Inches(1.8), y + Inches(0.06), Inches(6.4), INK_SOFT, 1.0)
-text(s, "TOTAL", MARGIN, y + Inches(0.18), Inches(1.6), Inches(0.3), font=MONO, size=12,
-     color=INK, align=PP_ALIGN.RIGHT)
-box(s, MARGIN + Inches(1.8), y + Inches(0.2), Emu(int(scale * 327)), Inches(0.3),
-    fill=MANGOSTEEN)
-text(s, "327 MB", MARGIN + Inches(1.9) + Emu(int(scale * 327)), y + Inches(0.18),
-     Inches(1.4), Inches(0.3), font=MONO, size=12, color=MANGOSTEEN, bold=True)
+rule(s, BAR_X, y + Inches(0.04), Inches(9.6), BASKET_DEEP, 1.0)
+text(s, "TOTAL", MARGIN, y + Inches(0.2), Inches(1.6), Inches(0.3), font=MONO, size=12,
+     color=INK, bold=True, align=PP_ALIGN.RIGHT)
+box(s, BAR_X, y + Inches(0.19), Emu(int(scale * 327)), Inches(0.32), fill=MANGOSTEEN)
+text(s, "327 MB", BAR_X + Inches(0.12) + Emu(int(scale * 327)), y + Inches(0.22),
+     Inches(1.4), Inches(0.3), font=MONO, size=13, color=MANGOSTEEN, bold=True)
 
-card(s, Inches(9.3), Inches(3.4), Inches(3.1), Inches(2.5), accent=MANGOSTEEN)
-text(s, [("250 MB", {"font": MONO, "size": 32, "bold": True, "color": MANGOSTEEN,
-                     "space_after": 4}),
-         ("Vercel Hobby limit", {"size": 13, "color": INK_SOFT, "space_after": 14}),
-         ("The deploy fails before a single prediction is served.",
-          {"size": 13.5, "color": INK})],
-     Inches(9.65), Inches(3.85), Inches(2.5), Inches(1.9), line=1.4)
+# The limit, drawn where it actually falls — the total crosses it by 77 MB.
+limit = s.shapes.add_connector(1, LIMIT_X, Inches(3.35), LIMIT_X, y + Inches(0.62))
+limit.line.color.rgb = INK
+limit.line.width = Pt(1.5)
+limit.line.dash_style = 4  # dash
+text(s, "250 MB  ·  VERCEL HOBBY LIMIT", LIMIT_X - Inches(3.6), Inches(3.02),
+     Inches(3.5), Inches(0.3), font=MONO, size=10.5, color=INK, spacing=1.4,
+     align=PP_ALIGN.RIGHT)
+
+text(s, "The deploy fails before a single prediction is ever served.",
+     MARGIN, y + Inches(0.95), Inches(8.0), Inches(0.4), size=15, color=INK)
 
 # 10 — the port --------------------------------------------------------------
 s = new("The insight", "A boosted tree is", "just a lot of if-statements")
@@ -587,7 +596,7 @@ text(s, "Interpolating to today would have made every screenshot look better and
 
 board = ASSETS / "board_card.png"
 if board.exists():
-    s.shapes.add_picture(str(board), Inches(7.5), Inches(2.9), width=Inches(4.9))
+    s.shapes.add_picture(str(board), Inches(7.3), Inches(2.75), width=Inches(5.4))
 
 # 15 — telegram --------------------------------------------------------------
 s = new("Second surface", "The same engine,", "in a chat window")
