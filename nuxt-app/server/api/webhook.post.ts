@@ -15,6 +15,15 @@ import { isFailure, sparkline } from '../utils/engine'
 
 const TELEGRAM_MAX = 4096
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+/** "2026-09" -> "Sep 2026" */
+function monthLabel(iso: string): string {
+  const [year, month] = iso.split('-')
+  return `${MONTHS[Number(month) - 1] ?? month} ${year}`
+}
+
+
 interface TelegramUpdate {
   message?: { chat?: { id?: number }, text?: string }
 }
@@ -149,8 +158,8 @@ export default defineEventHandler(async (event) => {
     `*${escapeMd(result.commodity)}*`,
     `${escapeMd(result.market)}, ${escapeMd(result.province)} · ${escapeMd(result.pricetype)}`,
     '',
-    `Last recorded (${result.lastDate}): *$${result.lastPrice.toFixed(3)}* / ${escapeMd(result.unit)}`,
-    `Next period forecast: *$${result.predictedPrice.toFixed(3)}*`,
+    `Last recorded (${monthLabel(result.lastDate)}): *$${result.lastPrice.toFixed(3)}* / ${escapeMd(result.unit)}`,
+    `Forecast for ${monthLabel(result.targetPeriod)}: *$${result.predictedPrice.toFixed(3)}*`,
     `${arrow} ${sign}${result.changePct.toFixed(1)}%`,
     '',
     `\`${sparkline(result.prices.slice(-24))}\``,
@@ -160,6 +169,13 @@ export default defineEventHandler(async (event) => {
   if (siteUrl) {
     const query = `commodity=${encodeForLink(result.commodity)}&market=${encodeForLink(result.market)}`
     lines.push('', `[See the chart](${siteUrl.replace(/\/$/, '')}/?${query})`)
+  }
+
+  if (result.monthsAhead > 1) {
+    // The series went quiet. Say so in the reply rather than letting the target month
+    // imply the underlying prices are recent.
+    lines.push('', `_Built from prices last recorded ${monthLabel(result.lastDate)} — `
+      + `${result.monthsAhead} months before the month forecast._`)
   }
 
   lines.push('', '_Model estimate, not an official price._')

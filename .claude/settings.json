@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(SLIDES_OUT=__TRACKED_VAR__/preview.pptx PYTHONIOENCODING=utf-8 python tools/build_slides.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python tools/build_slides.py)"
+    ]
+  }
+}

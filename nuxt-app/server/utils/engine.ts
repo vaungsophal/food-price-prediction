@@ -57,6 +57,10 @@ export interface Forecast {
   trend: 'up' | 'down' | 'stable'
   dates: string[]
   prices: number[]
+  /** The month being forecast, "YYYY-MM" — always the month after today. */
+  targetPeriod: string
+  /** Months between the last real observation and targetPeriod. 1 means the series is current. */
+  monthsAhead: number
 }
 
 export interface ForecastFailure {
@@ -122,6 +126,27 @@ export function fuzzyMatch(input: string, options: string[]): string | null {
     }
   }
   return best
+}
+
+/**
+ * The month being forecast: the one after `from`, which defaults to today.
+ *
+ * This is deliberately tied to the calendar rather than to where a series' data happens to
+ * stop. A user asking in August wants to hear about September, not about the month after
+ * whatever the last WFP report contained.
+ */
+export function nextPeriod(from: Date = new Date()): string {
+  const year = from.getUTCFullYear()
+  const month = from.getUTCMonth() + 1 // getUTCMonth is 0-based; this is the current month
+  const target = (month % 12) + 1
+  return `${target === 1 ? year + 1 : year}-${String(target).padStart(2, '0')}`
+}
+
+/** Whole months from one "YYYY-MM" to another. */
+export function monthsBetween(from: string, to: string): number {
+  const [fy, fm] = from.split('-').map(Number)
+  const [ty, tm] = to.split('-').map(Number)
+  return (ty! - fy!) * 12 + (tm! - fm!)
 }
 
 const BLOCKS = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█']
@@ -201,12 +226,25 @@ export class Engine {
   }
 
   /** Feature vector for the period after a series' last observation. */
-  buildFeatures(record: SeriesRecord, commodity: string, market: string, pricetype: string): number[] {
-    const { prices, dates } = record
-    const lastDate = dates[dates.length - 1]!
+  /**
+   * Feature vector for `targetPeriod` ("YYYY-MM").
+   *
+   * month and quarter describe the month being forecast; the three lag features describe the
+   * most recent prices on record. When a series is current those two things are adjacent, and
+   * this is an ordinary one-step-ahead forecast. When a series stopped reporting years ago they
+   * are not, and the caller is responsible for saying so — `monthsAhead` on the result carries
+   * the distance so the UI can show it rather than bury it.
+   */
+  buildFeatures(
+    record: SeriesRecord,
+    commodity: string,
+    market: string,
+    pricetype: string,
+    targetPeriod: string,
+  ): number[] {
+    const { prices } = record
 
-    // The model predicts the next reporting period, so roll the month forward.
-    const month = (Number(lastDate.split('-')[1]) % 12) + 1
+    const month = Number(targetPeriod.split('-')[1])
     const tail = prices.slice(-3)
 
     const values: Record<string, number> = {
@@ -225,7 +263,16 @@ export class Engine {
     return this.featureCols.map((col) => values[col]!)
   }
 
-  predict(commodityInput: string, marketInput: string, preferredType = 'Retail'): ForecastResult {
+  /**
+   * `now` is injectable so tests don't depend on the wall clock; production passes nothing
+   * and gets today.
+   */
+  predict(
+    commodityInput: string,
+    marketInput: string,
+    preferredType = 'Retail',
+    now: Date = new Date(),
+  ): ForecastResult {
     const commodity = fuzzyMatch(commodityInput, this.commodities)
     if (!commodity) {
       return { error: `Nothing in the dataset matches "${commodityInput}". Try a staple like rice, pork or eggs.` }
@@ -250,8 +297,12 @@ export class Engine {
     const record = byType[pricetype]!
 
     const { prices, dates } = record
+    const lastDate = dates[dates.length - 1]!
     const lastPrice = prices[prices.length - 1]!
-    const predictedPrice = this.rawPredict(this.buildFeatures(record, commodity, market, pricetype))
+
+    const targetPeriod = nextPeriod(now)
+    const features = this.buildFeatures(record, commodity, market, pricetype, targetPeriod)
+    const predictedPrice = this.rawPredict(features)
     const changePct = lastPrice ? ((predictedPrice - lastPrice) / lastPrice) * 100 : 0
 
     return {
@@ -260,13 +311,15 @@ export class Engine {
       province: record.admin1,
       pricetype,
       unit: record.unit,
-      lastDate: dates[dates.length - 1]!,
+      lastDate,
       lastPrice,
       predictedPrice,
       changePct,
       trend: changePct > 0.5 ? 'up' : changePct < -0.5 ? 'down' : 'stable',
       dates,
       prices,
+      targetPeriod,
+      monthsAhead: monthsBetween(lastDate, targetPeriod),
     }
   }
 }

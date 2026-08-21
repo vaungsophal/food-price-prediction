@@ -12,6 +12,8 @@ const props = defineProps<{
   predictedPrice: number
   unit: string
   trend: 'up' | 'down' | 'stable'
+  /** "YYYY-MM" of the month being forecast. */
+  targetPeriod: string
 }>()
 
 /**
@@ -43,14 +45,8 @@ function monthLabel(iso: string): string {
   return `${MONTHS[Number(month) - 1] ?? month} ${year}`
 }
 
-/** The period the forecast covers — one month past the last observation. */
-const forecastLabel = computed(() => {
-  const last = props.dates[props.dates.length - 1]
-  if (!last) return 'next'
-  const [year, month] = last.split('-').map(Number)
-  const next = (month! % 12) + 1
-  return `${MONTHS[next - 1]} ${next === 1 ? year! + 1 : year}`
-})
+/** The period the forecast covers. Comes from the server so the axis cannot drift from the card. */
+const forecastLabel = computed(() => monthLabel(props.targetPeriod))
 
 const geometry = computed(() => {
   const { w, h, left, right, top, bottom } = box.value

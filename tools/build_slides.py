@@ -15,6 +15,7 @@ run tools/metrics.py first if metrics.json is missing.
 """
 
 import json
+import os
 from pathlib import Path
 
 from pptx import Presentation
@@ -25,7 +26,9 @@ from pptx.util import Emu, Inches, Pt
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "tools" / "slide_assets"
-OUT = ROOT / "Cambodia_Food_Price_Forecast.pptx"
+# SLIDES_OUT lets you build to a scratch path while the real deck is open in PowerPoint,
+# which holds a write lock on it.
+OUT = Path(os.environ.get("SLIDES_OUT") or ROOT / "Cambodia_Food_Price_Forecast.pptx")
 
 # ---------- palette (identical to app/assets/css/main.css) ----------
 BASKET = RGBColor(0xE9, 0xE7, 0xDB)
@@ -53,6 +56,15 @@ BLANK = prs.slide_layouts[6]
 
 metrics = json.loads((ROOT / "tools" / "metrics.json").read_text())
 REF = json.loads((ROOT / "nuxt-app" / "test" / "reference.json").read_text())
+HISTORY = json.loads(
+    (ROOT / "nuxt-app" / "server" / "assets" / "artifacts" / "history.json").read_text(encoding="utf-8")
+)
+SERIES_COUNT = sum(len(by_type) for by_market in HISTORY.values() for by_type in by_market.values())
+
+# Headline figures, quoted on both the problem/solution slide and the result slide.
+xgb = metrics["rows"][-1]
+base = metrics["rows"][0]
+improve = (1 - xgb["mae"] / base["mae"]) * 100
 
 
 # ---------- primitives ----------
@@ -179,32 +191,59 @@ text(s, "will ask next", MARGIN, Inches(3.02), COL, Inches(1.1), font=DISPLAY,
      size=62, color=PALM, italic=True, line=1.0)
 rule(s, MARGIN, Inches(4.35), Inches(3.2), PALM_LIGHT, 1.5)
 text(s, "Forecasting food commodity prices in Cambodia — from World Food Programme "
-        "price monitoring to a live web app and a Telegram bot.",
+        "price monitoring to a web app and a Telegram bot.",
      MARGIN, Inches(4.7), Inches(7.7), Inches(1.0), size=17, color=INK_SOFT, line=1.45)
 text(s, "46 COMMODITIES   ·   76 MARKETS   ·   XGBOOST, PORTED TO TYPESCRIPT",
      MARGIN, Inches(6.35), COL, Inches(0.3), font=MONO, size=11, color=INK_SOFT,
      spacing=1.6)
 
-# 02 — the question ----------------------------------------------------------
-s = new("The question", "A price is only useful", "before you pay it")
-text(s, "The World Food Programme publishes what food cost in Cambodian markets — "
-        "twenty-three years of it, updated monthly. What it does not publish is what "
-        "food will cost next month.", MARGIN, Inches(2.5), Inches(6.2), Inches(1.6),
-     size=17, color=INK, line=1.5)
-text(s, "That gap is the project: a trader deciding when to buy, a household budgeting "
-        "for rice, an NGO sizing a food-assistance programme. All of them need the next "
-        "number, not the last one.", MARGIN, Inches(4.5), Inches(6.2), Inches(1.5),
-     size=16, color=INK_SOFT, line=1.5)
+# 02 — problem and solution --------------------------------------------------
+s = new("Problem & solution", "An early warning", "only works if it arrives")
 
-card(s, Inches(7.7), Inches(2.4), Inches(4.7), Inches(3.4), accent=PALM)
-text(s, "SCOPE", Inches(8.1), Inches(2.8), Inches(4.0), Inches(0.3), font=MONO,
-     size=10, color=INK_SOFT, spacing=2.0)
-text(s, [("Predict the next reported price", {"size": 20, "font": DISPLAY, "bold": True,
-                                              "color": INK, "space_after": 10}),
-         ("for a given commodity at a given market — and make that answer reachable "
-          "in two clicks or one chat message.", {"size": 15, "color": INK_SOFT})],
-     Inches(8.1), Inches(3.3), Inches(3.9), Inches(2.0), line=1.4)
-footnote(s, "Not a trading signal. A next-period estimate with its uncertainty made visible.")
+TOP, HEIGHT = Inches(2.4), Inches(3.95)
+PANELS = [
+    (MARGIN, Inches(5.5), MANGOSTEEN, "PROBLEM",
+     "A price rise lands hardest on the people with the least slack.",
+     ["For a low-income household food is the largest monthly cost, so a price rise "
+      "is not an inconvenience.",
+      "WFP tracks these markets to catch that early, but publishes what prices were "
+      "— not what they will be.",
+      f"And the record itself ships as a {metrics['raw_rows']:,}-row CSV: readable by "
+      "analysts, nobody else."]),
+    (Inches(6.93), Inches(5.5), PALM, "SOLUTION",
+     "Make the answer reachable in two clicks or one message.",
+     [f"{SERIES_COUNT:,} price series across 46 commodities and 76 markets, charted "
+      "for anyone with a browser.",
+      "A next-period forecast on each, with the line between recorded and predicted "
+      "drawn honestly.",
+      "Free to run — so a ministry, an NGO or a co-op could stand the same thing up "
+      "on its own feed."]),
+]
+
+for left, width, accent, label, lead, points in PANELS:
+    card(s, left, TOP, width, HEIGHT, accent=accent)
+    inner = left + Inches(0.4)
+    inner_w = width - Inches(0.8)
+
+    text(s, label, inner, TOP + Inches(0.32), inner_w, Inches(0.3), font=MONO,
+         size=10, color=accent, spacing=2.0)
+    text(s, lead, inner, TOP + Inches(0.72), inner_w, Inches(0.8), font=DISPLAY,
+         size=19, color=INK, bold=True, line=1.15)
+
+    # Each point is written to fit two lines at this measure; the step allows for that
+    # plus a gap, so the three of them land inside the card.
+    y = TOP + Inches(1.55)
+    for point in points:
+        box(s, inner, y + Inches(0.07), Inches(0.14), Inches(0.14), fill=accent)
+        text(s, point, inner + Inches(0.32), y, inner_w - Inches(0.32), Inches(0.6),
+             size=13.5, color=INK_SOFT, line=1.4)
+        y += Inches(0.78)
+
+# The turn from one panel to the other.
+text(s, "→", Inches(6.32), Inches(4.05), Inches(0.6), Inches(0.4), font=MONO, size=22,
+     color=PALM, align=PP_ALIGN.CENTER)
+
+footnote(s, "A demonstration on a snapshot, not a deployed service — the data ends March 2026 and the app says so, series by series.")
 
 # 03 — the data --------------------------------------------------------------
 s = new("The data", "Twenty-three years", "of market visits")
@@ -354,11 +393,7 @@ footnote(s, "Random Forest reproduced locally from the notebook's settings (n=30
 
 # 07 — headline result -------------------------------------------------------
 s = new("Result", "The model earns", "its place")
-xgb = metrics["rows"][-1]
-base = metrics["rows"][0]
-improve = (1 - xgb["mae"] / base["mae"]) * 100
-
-stats = [(f"${xgb['mae']:.3f}", "MEAN ABSOLUTE ERROR", "on held-out 2025-26 prices", PALM),
+stats =[(f"${xgb['mae']:.3f}", "MEAN ABSOLUTE ERROR", "on held-out 2025-26 prices", PALM),
          (f"{xgb['r2']:.3f}", "R² ON THE TEST PERIOD", "variance explained", PALM_LIGHT),
          (f"{improve:.1f}%", "BETTER THAN NAIVE", "MAE reduction vs. last price", TURMERIC_DEEP)]
 x = MARGIN
@@ -583,20 +618,60 @@ for title, desc, colour in legend:
 
 footnote(s, "Hand-rolled SVG — about 200 lines, no charting library.")
 
-# 14 — honest dates ----------------------------------------------------------
-s = new("Honesty", "The chart ends", "in June 2022")
-text(s, "The dataset runs to March 2026. This series does not. Rice wholesale prices in "
-        "Phnom Penh stopped being reported in June 2022, and the app says so instead of "
-        "carrying the line forward to look current.",
-     MARGIN, Inches(2.45), Inches(6.3), Inches(1.6), size=16.5, color=INK, line=1.5)
-text(s, "Interpolating to today would have made every screenshot look better and every "
-        "number less true. Of 4,035 series in the data, many stopped reporting years "
-        "apart — a single “latest” date across the app would be fiction.",
-     MARGIN, Inches(4.2), Inches(6.3), Inches(1.5), size=14.5, color=INK_SOFT, line=1.5)
+# 14 — forecast horizon ------------------------------------------------------
+# The obvious challenge from an examiner: the data stops in March 2026, so what does
+# "next period" even mean? This slide answers it with the real distribution rather
+# than letting the question hang.
+s = new("Forecast horizon", "One period past the record,", "not one month past today")
 
-board = ASSETS / "board_card.png"
-if board.exists():
-    s.shapes.add_picture(str(board), Inches(7.3), Inches(2.75), width=Inches(5.4))
+recency = {"2026-03 — still reporting": 0, "2025 — recently stopped": 0,
+           "2024 or earlier — stale": 0}
+for by_market in HISTORY.values():
+    for by_type in by_market.values():
+        for series in by_type.values():
+            end = series["dates"][-1]
+            key = ("2026-03 — still reporting" if end >= "2026-01"
+                   else "2025 — recently stopped" if end >= "2025-01"
+                   else "2024 or earlier — stale")
+            recency[key] += 1
+total_series = sum(recency.values())
+
+text(s, "The model forecasts one reporting period past each series' own last "
+        "observation — not one month past today. Series stopped reporting at very "
+        "different times, so that date differs for every commodity and market.",
+     MARGIN, Inches(2.45), Inches(5.6), Inches(1.6), size=16, color=INK, line=1.5)
+
+text(s, f"LAST OBSERVATION ACROSS {total_series:,} SERVED SERIES", MARGIN, Inches(4.15),
+     Inches(5.6), Inches(0.3), font=MONO, size=10, color=INK_SOFT, spacing=1.6)
+
+y = Inches(4.55)
+bar_scale = Inches(3.1)
+for label, count in recency.items():
+    share = count / total_series
+    colour = PALM if "still" in label else TURMERIC_DEEP if "recently" in label else MANGOSTEEN
+    box(s, MARGIN, y, Emu(int(bar_scale * share)), Inches(0.22), fill=colour)
+    text(s, f"{share * 100:.0f}%", MARGIN + Inches(0.1) + Emu(int(bar_scale * share)),
+         y - Inches(0.03), Inches(0.7), Inches(0.3), font=MONO, size=11.5, color=colour,
+         bold=True)
+    text(s, f"{label}  ·  {count:,}", MARGIN, y + Inches(0.26), Inches(5.4),
+         Inches(0.3), size=12.5, color=INK_SOFT)
+    y += Inches(0.72)
+
+card(s, Inches(6.93), Inches(2.4), Inches(5.5), Inches(3.95), accent=PALM)
+text(s, "SO IS IT ACTUALLY FORECASTING?", Inches(7.33), Inches(2.72), Inches(4.7),
+     Inches(0.3), font=MONO, size=10, color=PALM, spacing=1.6)
+text(s, [("Yes — and that is what the test period measures.",
+          {"size": 19, "font": DISPLAY, "bold": True, "color": INK, "space_after": 12}),
+         (f"Training stopped at {metrics['split']}; all {metrics['n_test']:,} test rows "
+          "fall after it. The model was scored on dates it had never seen — a real "
+          "out-of-sample forecast.", {"size": 13.5, "color": INK_SOFT,
+                                      "space_after": 12}),
+         ("What it cannot do is forecast today from a series that went quiet in 2022 — "
+          "and the app prints the real date rather than hiding it.",
+          {"size": 13.5, "color": INK_SOFT})],
+     Inches(7.33), Inches(3.2), Inches(4.7), Inches(2.9), line=1.4)
+
+footnote(s, "Rice at Phnom Penh, wholesale: last recorded June 2022, so the app labels its forecast July 2022 — not next month.")
 
 # 15 — telegram --------------------------------------------------------------
 s = new("Second surface", "The same engine,", "in a chat window")

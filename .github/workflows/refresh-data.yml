@@ -1,0 +1,74 @@
+name: Refresh price data
+
+# WFP republishes the Cambodia food price CSV roughly monthly. This checks weekly and
+# commits only when the feed has actually moved.
+#
+# A no-op run is cheap: scripts/refresh-history.mjs asks the HDX package API (31 KB)
+# whether the resource changed, and skips the 12 MB download when last_modified still
+# matches the stamp in server/assets/artifacts/source.json.
+#
+# When it does commit, Vercel's git integration picks up the push, reruns `npm run build`
+# and redeploys with the new history.json. That push is the whole auto-update path — the
+# app cannot update without one.
+#
+# Note: scheduled workflows only run on the repository's DEFAULT branch. This file has to
+# be merged to main before the cron will ever fire.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Mondays 06:00 UTC (13:00 in Cambodia)
+  workflow_dispatch:      # plus a manual "Run workflow" button for testing
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-price-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No `npm ci` on purpose: the refresh script imports only node:fs, node:url and
+      # global fetch, so it has no dependencies to install.
+      - name: Refresh history.json from HDX
+        working-directory: nuxt-app
+        run: node scripts/refresh-history.mjs
+
+      - name: Commit and push if the feed moved
+        run: |
+          ARTIFACTS=nuxt-app/server/assets/artifacts
+
+          if git diff --quiet -- "$ARTIFACTS"; then
+            echo "HDX has published nothing new — no commit." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          COVERAGE=$(node -p "require('./$ARTIFACTS/source.json').datasetDate")
+          SERIES=$(node -p "require('./$ARTIFACTS/source.json').seriesEmitted")
+
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$ARTIFACTS"
+          git commit \
+            -m 'chore(data): refresh WFP price history from HDX' \
+            -m "Coverage: $COVERAGE" \
+            -m "Series: $SERIES"
+          git push
+
+          {
+            echo "### Price data refreshed"
+            echo ""
+            echo "- Coverage: \`$COVERAGE\`"
+            echo "- Series: $SERIES"
+            echo ""
+            echo "Pushed to \`${GITHUB_REF_NAME}\` — Vercel will redeploy."
+          } >> "$GITHUB_STEP_SUMMARY"

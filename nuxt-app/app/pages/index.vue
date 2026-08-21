@@ -87,11 +87,23 @@ function monthLabel(iso: string): string {
   return `${MONTHS[Number(month) - 1] ?? month} ${year}`
 }
 
-const nextPeriod = computed(() => {
-  if (!forecast.value) return ''
-  const [year, month] = forecast.value.lastDate.split('-').map(Number)
-  const next = (month! % 12) + 1
-  return `${MONTHS[next - 1]} ${next === 1 ? year! + 1 : year}`
+/** The month being forecast — always next month, whatever the data happens to end at. */
+const targetLabel = computed(() => (forecast.value ? monthLabel(forecast.value.targetPeriod) : ''))
+
+/**
+ * How far the forecast reaches past the last real observation. One month is an ordinary
+ * next-period forecast; anything more means the series went quiet and the model is working
+ * from prices that old. That distance is stated on the card rather than left for the reader
+ * to work out from two dates.
+ */
+const staleness = computed(() => {
+  if (!forecast.value || forecast.value.monthsAhead <= 1) return null
+  const months = forecast.value.monthsAhead
+  const years = Math.floor(months / 12)
+  const span = years >= 1 ? `${years} year${years > 1 ? 's' : ''}` : `${months} months`
+  return `This series stopped reporting in ${monthLabel(forecast.value.lastDate)}. The forecast `
+    + `still targets ${targetLabel.value}, but it is built from prices about ${span} old — treat `
+    + `it as an illustration of the method, not a current market estimate.`
 })
 
 useHead({
@@ -173,7 +185,7 @@ useHead({
             <dd class="mono">{{ money(forecast.lastPrice) }}</dd>
           </div>
           <div class="figure figure--lead">
-            <dt class="eyebrow">Forecast · {{ nextPeriod }}</dt>
+            <dt class="eyebrow">Forecast · {{ targetLabel }}</dt>
             <dd class="mono">{{ money(forecast.predictedPrice) }}</dd>
           </div>
           <div class="figure">
@@ -186,6 +198,8 @@ useHead({
         </dl>
 
         <p class="per-unit mono">per {{ forecast.unit }}, USD</p>
+
+        <p v-if="staleness" class="staleness">{{ staleness }}</p>
       </section>
 
       <section class="card">
@@ -193,6 +207,7 @@ useHead({
           :dates="forecast.dates"
           :prices="forecast.prices"
           :predicted-price="forecast.predictedPrice"
+          :target-period="forecast.targetPeriod"
           :unit="forecast.unit"
           :trend="forecast.trend"
         />
@@ -377,6 +392,16 @@ button[type='submit']:disabled {
 
 .change span {
   font-size: 0.8em;
+}
+
+.staleness {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--basket-deep);
+  max-width: 68ch;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--mangosteen);
 }
 
 .per-unit {

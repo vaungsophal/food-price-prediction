@@ -4,11 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxt build",
+    "build": "node scripts/refresh-history.mjs && nuxt build",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
-    "test": "vitest run"
+    "test": "vitest run",
+    "refresh": "node scripts/refresh-history.mjs"
   },
   "dependencies": {
     "nuxt": "^4.5.2",

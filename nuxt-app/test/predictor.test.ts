@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 import type { Encoders, History, ModelArtifact } from '../server/utils/engine'
-import { Engine, fuzzyMatch, isFailure, similarity, sparkline } from '../server/utils/engine'
+import { Engine, fuzzyMatch, isFailure, monthsBetween, nextPeriod, similarity, sparkline } from '../server/utils/engine'
 
 import reference from './reference.json' with { type: 'json' }
 
@@ -31,16 +31,41 @@ const engine = new Engine({
  * repo, which is the only claim a test can honestly make.
  */
 describe('cross-language correctness', () => {
-  it('reproduces the Python model on Rice (mixed, low quality) at Phnom Penh', () => {
-    const result = engine.predict(reference.commodity, reference.market, reference.pricetype)
+  it('reproduces the Python model on the reference feature vector', () => {
+    // Asserted against rawPredict rather than predict(), because predict() now derives
+    // month and quarter from today's date. The traversal and the feature order are what
+    // this test exists to pin, and neither depends on the calendar.
+    expect(engine.rawPredict(reference.features)).toBeCloseTo(reference.pythonPrediction, 5)
+    expect(engine.rawPredict(reference.features)).toBeCloseTo(0.460955, 5)
+  })
+
+  it('predicts the reference series with the same numbers when asked about July 2022', () => {
+    const result = engine.predict(
+      reference.commodity, reference.market, reference.pricetype,
+      new Date(Date.UTC(2022, 5, 15)), // June 2022 -> target July 2022, as the fixture assumes
+    )
     expect(isFailure(result)).toBe(false)
     if (isFailure(result)) return
 
     expect(result.pricetype).toBe('Wholesale')
     expect(result.lastDate).toBe('2022-06')
     expect(result.lastPrice).toBe(0.44)
+    expect(result.targetPeriod).toBe('2022-07')
+    expect(result.monthsAhead).toBe(1)
     expect(result.predictedPrice).toBeCloseTo(reference.pythonPrediction, 5)
-    expect(result.predictedPrice).toBeCloseTo(0.460955, 5)
+  })
+
+  it('targets the month after today, not the month after the data', () => {
+    const result = engine.predict(
+      reference.commodity, reference.market, reference.pricetype,
+      new Date(Date.UTC(2026, 7, 21)), // 21 Aug 2026
+    )
+    expect(isFailure(result)).toBe(false)
+    if (isFailure(result)) return
+
+    expect(result.targetPeriod).toBe('2026-09')
+    expect(result.lastDate).toBe('2022-06')       // the record still ends where it ends
+    expect(result.monthsAhead).toBe(51)           // and the gap is reported, not hidden
   })
 
   it('builds the feature vector the Python side used', () => {
@@ -52,6 +77,7 @@ describe('cross-language correctness', () => {
       reference.commodity,
       reference.market,
       reference.pricetype,
+      '2022-07',
     )
 
     expect(features).toHaveLength(10)
@@ -149,6 +175,23 @@ describe('predict failure modes', () => {
   it('explains an unmatched commodity instead of guessing', () => {
     const result = engine.predict('qwertyuiop', 'Phnom Penh')
     expect(isFailure(result)).toBe(true)
+  })
+})
+
+describe('forecast period', () => {
+  it('targets the month after the given date', () => {
+    expect(nextPeriod(new Date(Date.UTC(2026, 7, 21)))).toBe('2026-09')
+    expect(nextPeriod(new Date(Date.UTC(2026, 0, 1)))).toBe('2026-02')
+  })
+
+  it('wraps December into January of the next year', () => {
+    expect(nextPeriod(new Date(Date.UTC(2026, 11, 31)))).toBe('2027-01')
+  })
+
+  it('measures the gap between two periods', () => {
+    expect(monthsBetween('2022-06', '2022-07')).toBe(1)
+    expect(monthsBetween('2022-06', '2026-09')).toBe(51)
+    expect(monthsBetween('2026-03', '2026-09')).toBe(6)
   })
 })
 
