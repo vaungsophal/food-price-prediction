@@ -42,9 +42,9 @@ part of the dev server, so there's no `vercel dev` requirement.
 
 The four JSON files are committed, so you only need this after retraining.
 
-1. Run [`../cambodia_food_price_prediction.ipynb`](../cambodia_food_price_prediction.ipynb)
+1. Run [`../notebooks/cambodia_food_price_prediction.ipynb`](../notebooks/cambodia_food_price_prediction.ipynb)
    in Colab. Its last cell downloads `model_artifacts.zip`.
-2. Unpack it in the repo root so `model_artifacts/price_model.pkl` exists.
+2. Unpack it so `model_artifacts/price_model.pkl` exists.
 3. From the repo root:
 
 ```bash

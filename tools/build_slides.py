@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "tools" / "slide_assets"
 # SLIDES_OUT lets you build to a scratch path while the real deck is open in PowerPoint,
 # which holds a write lock on it.
-OUT = Path(os.environ.get("SLIDES_OUT") or ROOT / "Cambodia_Food_Price_Forecast.pptx")
+OUT = Path(os.environ.get("SLIDES_OUT") or ROOT / "reports" / "Cambodia_Food_Price_Forecast.pptx")
 
 # ---------- palette (identical to app/assets/css/main.css) ----------
 BASKET = RGBColor(0xE9, 0xE7, 0xDB)

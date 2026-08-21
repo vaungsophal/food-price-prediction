@@ -33,11 +33,17 @@ $0.46 per unit
 
 ## Dataset
 
-Dataset:
+Dataset file:
 
 **WFP Food Prices for Cambodia**
 
 https://data.humdata.org/dataset/wfp-food-prices-for-cambodia
+
+Local CSV:
+
+```text
+data/wfp_food_prices_khm.csv
+```
 
 The dataset contains historical food price records for different commodities, markets, provinces, price types, and dates in Cambodia.
 
@@ -193,10 +199,23 @@ The test suite checks that the TypeScript prediction engine matches the Python m
 ```text
 food-price-prediction/
 |
-|-- cambodia_food_price_prediction.ipynb
-|-- wfp_food_prices_khm.csv
+|-- data/
+|   |-- wfp_food_prices_khm.csv
+|-- notebooks/
+|   |-- cambodia_food_price_prediction.ipynb
+|-- reports/
+|   |-- Cambodia_Food_Price_Forecast.pdf
+|   |-- Cambodia_Food_Price_Forecast.pptx
+|-- docs/
+|   |-- prompt.md
 |-- model_artifacts/
+|   |-- model_artifacts/
+|   |   |-- price_model.pkl
+|   |   |-- encoders.pkl
+|   |   |-- feature_cols.pkl
+|   |-- model_artifacts.zip
 |-- tools/
+|   |-- build_slides.py
 |   |-- export_artifacts.py
 |   |-- metrics.json
 |-- nuxt-app/

@@ -25,7 +25,7 @@ import joblib
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-RAW_CSV = ROOT / "wfp_food_prices_khm.csv"
+RAW_CSV = ROOT / "data" / "wfp_food_prices_khm.csv"
 OUT = ROOT / "nuxt-app" / "server" / "assets" / "artifacts"
 FIXTURE = ROOT / "nuxt-app" / "test" / "reference.json"
 
@@ -37,7 +37,7 @@ ART = next((p for p in CANDIDATES if (p / "price_model.pkl").exists()), None)
 if ART is None:
     sys.exit(
         "price_model.pkl not found. Run the notebook, download model_artifacts.zip and\n"
-        "unpack it in the repo root so that model_artifacts/price_model.pkl exists."
+        "unpack it so that model_artifacts/price_model.pkl exists."
     )
 print(f"Reading artifacts from {ART.relative_to(ROOT)}")
 
