@@ -1,8 +1,0 @@
-{
-  "functions": {
-    "api/**/*.ts": {
-      "includeFiles": "api/_lib/artifacts/**",
-      "maxDuration": 10
-    }
-  }
-}

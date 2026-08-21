@@ -1,0 +1,99 @@
+/*
+ * Palette and type come from the subject: a Cambodian wet market. Woven-palm basket for
+ * the ground, chalk for the price boards, banana-leaf green for anything primary,
+ * mangosteen and turmeric for the two directions a forecast can go.
+ */
+
+:root {
+  --basket: #e9e7db;
+  --basket-deep: #dcd9c9;
+  --chalk: #fcfbf7;
+  --ink: #191e19;
+  --ink-soft: #5c625a;
+  --palm: #2f5d46;
+  --palm-light: #4d8065;
+  --mangosteen: #6b2545;
+  --turmeric: #d99a0b;
+
+  --display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  --radius: 4px;
+  --shadow: 0 1px 2px rgb(25 30 25 / 6%), 0 8px 24px -12px rgb(25 30 25 / 18%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--basket);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+
+  /* A faint woven texture, drawn rather than downloaded. */
+  background-image:
+    repeating-linear-gradient(90deg, rgb(25 30 25 / 2.5%) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(0deg, rgb(25 30 25 / 2.5%) 0 1px, transparent 1px 7px);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--palm);
+}
+
+/* Eyebrows, axis labels, units, anything numeric. */
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--palm);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Motion is decorative here; every animation has a static end state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
