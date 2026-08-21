@@ -310,6 +310,10 @@ The final system is not only a notebook model. It is also available through:
 
 The user can select a commodity and market in the browser, view the latest recorded price, see the predicted next price, and inspect recent historical prices on a chart.
 
+![Demo screen of the Cambodia food price prediction web app](demo_screen.png)
+
+Figure 1. Demo screen showing the commodity selector, market selector, forecast result, and historical price chart.
+
 ---
 
 ## VI. Discussion
