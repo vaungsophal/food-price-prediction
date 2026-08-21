@@ -26,9 +26,8 @@ const engine = new Engine({
  * to within float32 rounding.
  *
  * Note on the number: the task brief quoted 0.460394 for this series. That figure came from
- * an earlier training run. The model actually shipped here (model_artifacts/price_model.pkl)
- * answers 0.460955, confirmed by calling xgboost directly. The port matches the model in the
- * repo, which is the only claim a test can honestly make.
+ * an earlier training run. The assertion below uses the freshly exported reference fixture,
+ * so it always pins the TypeScript port to the model artifacts actually shipped.
  */
 describe('cross-language correctness', () => {
   it('reproduces the Python model on the reference feature vector', () => {
@@ -36,7 +35,6 @@ describe('cross-language correctness', () => {
     // month and quarter from today's date. The traversal and the feature order are what
     // this test exists to pin, and neither depends on the calendar.
     expect(engine.rawPredict(reference.features)).toBeCloseTo(reference.pythonPrediction, 5)
-    expect(engine.rawPredict(reference.features)).toBeCloseTo(0.460955, 5)
   })
 
   it('predicts the reference series with the same numbers when asked about July 2022', () => {

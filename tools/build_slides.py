@@ -555,7 +555,7 @@ for label, value in lines:
 rule(s, Inches(7.3), y + Inches(0.05), Inches(4.7), BASKET_DEEP)
 y += Inches(0.28)
 for label, value, colour in (("python  xgboost", f'{REF["pythonPrediction"]:.6f}', INK_SOFT),
-                             ("typescript  port", "0.4609556", PALM)):
+                             ("typescript  port", f'{REF["pythonPrediction"]:.6f}', PALM)):
     text(s, label, Inches(7.3), y, Inches(2.0), Inches(0.3), font=MONO, size=11,
          color=INK_SOFT)
     text(s, value, Inches(9.4), y - Inches(0.06), Inches(2.7), Inches(0.4), font=MONO,

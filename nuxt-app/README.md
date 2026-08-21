@@ -184,12 +184,12 @@ npm test
 
 The load-bearing case is a cross-language check: the TypeScript traversal must reproduce the
 Python model's own answer for `Rice (mixed, low quality)` at `Phnom Penh`, pricetype
-`Wholesale` — last recorded price `$0.44` in June 2022, forecast **`0.460955`**. A wrong
+`Wholesale` — last recorded price `$0.44` in June 2022, forecast **`0.458068`**. A wrong
 feature order or a flipped comparison in the tree walk changes that number, and nothing else
 in the suite would catch it.
 
 > The original task brief quoted `0.460394` for this series. That figure came from an
-> earlier training run; the model in `model_artifacts/price_model.pkl` answers `0.460955`,
+> earlier training run; the retrained model in `model_artifacts/price_model.pkl` answers `0.458068`,
 > confirmed by calling xgboost directly. The test asserts against the model actually
 > shipped, and `test/reference.json` is regenerated whenever the model is.
 
