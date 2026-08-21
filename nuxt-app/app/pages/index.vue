@@ -13,7 +13,7 @@ const route = useRoute()
 
 const { data: options } = await useFetch<Options>('/api/options')
 
-/** Telegram links back here with ?commodity=&market=, so honour those on first load. */
+/** Honour shared links with ?commodity=&market= on first load. */
 const queryCommodity = typeof route.query.commodity === 'string' ? route.query.commodity : ''
 const queryMarket = typeof route.query.market === 'string' ? route.query.market : ''
 

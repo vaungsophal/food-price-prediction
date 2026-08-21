@@ -149,19 +149,6 @@ export function monthsBetween(from: string, to: string): number {
   return (ty! - fy!) * 12 + (tm! - fm!)
 }
 
-const BLOCKS = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█']
-
-/** Unicode block sparkline — the only chart Telegram can render inline. */
-export function sparkline(values: number[]): string {
-  if (!values.length) return ''
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  const span = max - min
-  return values
-    .map((v) => BLOCKS[span === 0 ? 3 : Math.min(BLOCKS.length - 1, Math.floor(((v - min) / span) * BLOCKS.length))]!)
-    .join('')
-}
-
 export class Engine {
   readonly commodities: string[]
   readonly markets: string[]
@@ -203,26 +190,6 @@ export class Engine {
 
   marketsByCommodity(): Record<string, string[]> {
     return Object.fromEntries(this.commodities.map((c) => [c, this.marketsFor(c)]))
-  }
-
-  /**
-   * Split "rice phnom penh" into ["rice", "phnom penh"].
-   *
-   * Market names contain spaces and we can't know the boundary up front, so try
-   * progressively longer candidates from the right against the known market list. If none
-   * match, assume the last word is the market and let fuzzyMatch sort it out.
-   */
-  splitCommodityMarket(text: string): [string, string] | null {
-    const words = text.trim().split(/\s+/).filter(Boolean)
-    if (words.length < 2) return null
-
-    const known = new Set(this.markets.map((m) => m.toLowerCase()))
-    for (let i = words.length - 1; i > 0; i--) {
-      if (known.has(words.slice(i).join(' ').toLowerCase())) {
-        return [words.slice(0, i).join(' '), words.slice(i).join(' ')]
-      }
-    }
-    return [words.slice(0, -1).join(' '), words[words.length - 1]!]
   }
 
   /** Feature vector for the period after a series' last observation. */

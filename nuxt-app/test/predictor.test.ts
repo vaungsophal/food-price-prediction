@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 import type { Encoders, History, ModelArtifact } from '../server/utils/engine'
-import { Engine, fuzzyMatch, isFailure, monthsBetween, nextPeriod, similarity, sparkline } from '../server/utils/engine'
+import { Engine, fuzzyMatch, isFailure, monthsBetween, nextPeriod, similarity } from '../server/utils/engine'
 
 import reference from './reference.json' with { type: 'json' }
 
@@ -131,28 +131,6 @@ describe('fuzzyMatch', () => {
   })
 })
 
-describe('splitCommodityMarket', () => {
-  it('recognises a multi-word market name', () => {
-    expect(engine.splitCommodityMarket('rice phnom penh')).toEqual(['rice', 'phnom penh'])
-  })
-
-  it('handles a multi-word commodity too', () => {
-    expect(engine.splitCommodityMarket('vegetable oil phnom penh')).toEqual([
-      'vegetable oil',
-      'phnom penh',
-    ])
-  })
-
-  it('falls back to the last word when no known market matches', () => {
-    expect(engine.splitCommodityMarket('rice nowhere')).toEqual(['rice', 'nowhere'])
-  })
-
-  it('refuses a single word — a commodity alone is not a query', () => {
-    expect(engine.splitCommodityMarket('rice')).toBe(null)
-    expect(engine.splitCommodityMarket('  ')).toBe(null)
-  })
-})
-
 describe('predict failure modes', () => {
   it('names the markets that do carry a commodity the chosen one does not', () => {
     const stranded = engine.commodities
@@ -193,16 +171,3 @@ describe('forecast period', () => {
   })
 })
 
-describe('sparkline', () => {
-  it('maps a rising series across the block range', () => {
-    expect(sparkline([1, 2, 3, 4, 5, 6, 7, 8])).toBe('▁▂▃▄▅▆▇█')
-  })
-
-  it('renders a flat series at a constant height', () => {
-    expect(sparkline([2, 2, 2])).toBe('▄▄▄')
-  })
-
-  it('handles an empty series', () => {
-    expect(sparkline([])).toBe('')
-  })
-})

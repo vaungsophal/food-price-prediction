@@ -7,7 +7,6 @@ The project includes:
 - A Python notebook for data cleaning, feature engineering, model training, and evaluation
 - A trained XGBoost regression model
 - A Nuxt 4 web app with API routes
-- A Telegram bot webhook that uses the same prediction engine
 
 ## Project Goal
 
@@ -99,7 +98,7 @@ Model Evaluation
 Export Model Artifacts
         |
         v
-Nuxt API + Web App + Telegram Bot
+Nuxt API + Web App
 ```
 
 ## Model Artifacts
@@ -146,27 +145,7 @@ The app supports:
 - Price forecast
 - Historical price chart
 - Clear warning when the latest data for a series is old
-- API routes for web and Telegram usage
-
-## Telegram Bot
-
-The Telegram bot uses the Nuxt API webhook route.
-
-Commands include:
-
-```text
-/start
-/help
-/predict <commodity> <market>
-/commodities
-/markets
-```
-
-Example:
-
-```text
-/predict rice phnom penh
-```
+- API routes for web usage
 
 ## Run the Nuxt App
 
@@ -206,6 +185,7 @@ food-price-prediction/
 |-- reports/
 |   |-- Cambodia_Food_Price_Forecast.pdf
 |   |-- Cambodia_Food_Price_Forecast.pptx
+|   |-- Cambodia_Food_Price_Prediction_Report.md
 |-- docs/
 |   |-- prompt.md
 |-- model_artifacts/
@@ -237,7 +217,6 @@ Project: Cambodia Food Price Prediction
 AI Task: Regression / time-series style forecasting
 Dataset: WFP Cambodia Food Prices
 Frontend: Nuxt 4 / Vue 3
-Bot: Telegram webhook
 Deployment: Vercel
 ```
 

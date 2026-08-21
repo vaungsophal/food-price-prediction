@@ -30,13 +30,6 @@ export default defineNuxtConfig({
     },
   },
 
-  runtimeConfig: {
-    /** Set NUXT_WEBHOOK_SECRET to the secret_token you passed to Telegram's setWebhook. */
-    webhookSecret: '',
-    /** Set NUXT_SITE_URL to the deployed origin so bot replies can link to the chart. */
-    siteUrl: '',
-  },
-
   // The four model artifacts live in server/assets/artifacts/ and are read through
   // useStorage('assets:server'), which is what carries them into the build output as
   // files rather than as inlined literals. See server/utils/predictor.ts. Nitro detects

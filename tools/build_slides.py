@@ -191,7 +191,7 @@ text(s, "will ask next", MARGIN, Inches(3.02), COL, Inches(1.1), font=DISPLAY,
      size=62, color=PALM, italic=True, line=1.0)
 rule(s, MARGIN, Inches(4.35), Inches(3.2), PALM_LIGHT, 1.5)
 text(s, "Forecasting food commodity prices in Cambodia — from World Food Programme "
-        "price monitoring to a web app and a Telegram bot.",
+        "price monitoring to a web app and API.",
      MARGIN, Inches(4.7), Inches(7.7), Inches(1.0), size=17, color=INK_SOFT, line=1.45)
 text(s, "46 COMMODITIES   ·   76 MARKETS   ·   XGBOOST, PORTED TO TYPESCRIPT",
      MARGIN, Inches(6.35), COL, Inches(0.3), font=MONO, size=11, color=INK_SOFT,
@@ -559,19 +559,18 @@ for label, value, colour in (("python  xgboost", f'{REF["pythonPrediction"]:.6f}
 text(s, "agree to 1e-5  ·  asserted on every test run", Inches(7.3), y + Inches(0.05),
      Inches(4.7), Inches(0.3), font=MONO, size=11, color=PALM)
 
-text(s, "19 tests cover the traversal, the fuzzy matching, the commodity/market splitter "
-        "and every failure path.", MARGIN, Inches(4.75), Inches(5.5), Inches(0.8),
+text(s, "17 tests cover the traversal, fuzzy matching, forecast periods and every failure "
+        "path.", MARGIN, Inches(4.75), Inches(5.5), Inches(0.8),
      size=14, color=INK_SOFT, line=1.45)
 
-# 12 - web app and bot --------------------------------------------------------
+# 12 - web app ---------------------------------------------------------------
 s = new("Product", "A forecast people", "can actually open")
-text(s, "The model is not left in the notebook. Nuxt serves the same prediction engine through a web page, API routes and a Telegram webhook.",
+text(s, "The model is not left in the notebook. Nuxt serves the same prediction engine through a web page and API routes.",
      MARGIN, Inches(2.35), Inches(6.1), Inches(1.0), size=16, color=INK, line=1.45)
 
 app_facts = [
     ("Browser", "Choose a commodity and market, then see the latest price, forecast and chart."),
     ("API", "/api/predict returns the same forecast for the web UI and outside clients."),
-    ("Telegram", "/predict rice phnom penh gives a fast text answer with a small sparkline."),
     ("Deployment", "Vercel only receives the Nuxt app and JSON artifacts, not Python ML libraries."),
 ]
 y = Inches(3.65)
@@ -587,7 +586,7 @@ hero = ASSETS / "hero.png"
 if hero.exists():
     s.shapes.add_picture(str(hero), Inches(7.25), Inches(0.6), height=Inches(6.25))
 
-footnote(s, "One trained model, one TypeScript engine, two user-facing surfaces.")
+footnote(s, "One trained model, one TypeScript engine, one focused web product.")
 
 # 13 - chart honesty ----------------------------------------------------------
 s = new("Design choice", "The forecast must", "look different")
@@ -644,13 +643,13 @@ text(s, "Public data becomes useful", MARGIN, Inches(1.9), COL, Inches(0.9),
 text(s, "when it answers tomorrow", MARGIN, Inches(2.72), COL, Inches(0.9),
      font=DISPLAY, size=50, color=PALM, italic=True, line=1.05)
 rule(s, MARGIN, Inches(3.85), Inches(3.2), PALM_LIGHT, 1.5)
-text(s, "Cambodia already has valuable food-price records. This project shows how AI can turn those records into a small, explainable forecasting tool that ordinary users can reach from a browser or chat message.",
+text(s, "Cambodia already has valuable food-price records. This project shows how AI can turn those records into a small, explainable forecasting tool that ordinary users can reach from a browser.",
      MARGIN, Inches(4.25), Inches(8.6), Inches(1.25), size=18, color=INK, line=1.45)
 
 stack = [
     ("Data", "WFP Cambodia food prices"),
     ("Model", "XGBoost regression, tested chronologically"),
-    ("Product", "Nuxt app, API and Telegram bot"),
+    ("Product", "Nuxt web app and API"),
 ]
 y = Inches(5.75)
 for label, value in stack:

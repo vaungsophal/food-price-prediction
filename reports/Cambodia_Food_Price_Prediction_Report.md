@@ -12,17 +12,17 @@
 | ------------- | ------------------------------------------------------------ |
 | Project title | Cambodia Food Price Prediction                               |
 | Khmer title   | ការព្យាករណ៍តម្លៃអាហារនៅកម្ពុជា |
-| Course        | ITM-390 Machine Learning                                     |
+| Course        | AI                                                           |
 | Department    | School of Digital Technologies                               |
 | Advisor       | [Advisor Name]                                               |
 | Team          | [Group / Team Name]                                          |
 
 ## Team Members
 
-| Role     | Name    | Student ID    |
-| -------- | ------- | ------------- |
-| Member 1 | [Name]  | [Student ID]  |
-| Member 2 | [Name]  | [Student ID]  |
+| Role     | Name   | Student ID   |
+| -------- | ------ | ------------ |
+| Member 1 | [Name] | [Student ID] |
+| Member 2 | [Name] | [Student ID] |
 
 ITM 390 - Machine Learning Final Project Report
 
@@ -34,7 +34,7 @@ Food prices are an important daily concern for households, students, vendors, an
 
 The World Food Programme (WFP) food price dataset for Cambodia provides historical records across many commodities and markets. These records include date, province, market, commodity, price type, unit, local price, and USD price. However, the dataset mainly tells users what already happened. The main problem addressed by this project is how to turn historical market data into a simple forecasting tool that can estimate the next food price for a selected commodity and market.
 
-This project proposes a machine learning system that predicts Cambodia food prices using historical WFP market data. The system uses regression models to forecast USD food prices from recent price behavior, calendar features, commodity identity, market identity, province, category, and price type. The final model is an XGBoost regression model that is exported into JSON and served through a Nuxt web application and Telegram bot.
+This project proposes a machine learning system that predicts Cambodia food prices using historical WFP market data. The system uses regression models to forecast USD food prices from recent price behavior, calendar features, commodity identity, market identity, province, category, and price type. The final model is an XGBoost regression model that is exported into JSON and served through a Nuxt web application.
 
 The hypothesis of this study is:
 
@@ -46,7 +46,7 @@ This project contributes:
 - A chronological machine learning experiment for price forecasting.
 - A comparison between a naive baseline, Random Forest, and XGBoost.
 - A lightweight deployment approach that ports the trained XGBoost model to TypeScript.
-- A user-facing web application, API, and Telegram bot for food price prediction.
+- A user-facing web application and API for food price prediction.
 
 ---
 
@@ -60,7 +60,7 @@ Food price forecasting is commonly used for market monitoring, food security ana
 
 Gap: Many public datasets are available, but they are not always converted into tools that ordinary users can access.
 
-Relevance: This project uses WFP Cambodia food price data and turns it into a prediction system with a web and chat interface.
+Relevance: This project uses WFP Cambodia food price data and turns it into a prediction system with a web interface.
 
 ### B. Time-Series Machine Learning
 
@@ -110,7 +110,6 @@ The proposed system consists of four major components:
 
    - Nuxt web app for browser users.
    - API routes for prediction and options.
-   - Telegram webhook for chat-based prediction.
 
 ### B. Research Flowchart
 
@@ -136,7 +135,7 @@ Evaluate Regression Metrics
 Export Model Artifacts to JSON
         |
         v
-Nuxt Web App + API + Telegram Bot
+Nuxt Web App + API
 ```
 
 ### C. Dataset Description
@@ -307,15 +306,9 @@ The final system is not only a notebook model. It is also available through:
 - A Nuxt 4 web application.
 - `/api/options` for commodity and market options.
 - `/api/predict` for food price forecasting.
-- `/api/webhook` for Telegram bot prediction.
+- A deployed web interface for selecting commodities and markets.
 
-The user can select a commodity and market in the browser, view the latest recorded price, see the predicted next price, and inspect recent historical prices on a chart. Telegram users can request a prediction using a command such as:
-
-```text
-/predict rice Phnom Penh
-```
-
-The system returns a forecast, last recorded price, trend direction, and a small text sparkline.
+The user can select a commodity and market in the browser, view the latest recorded price, see the predicted next price, and inspect recent historical prices on a chart.
 
 ---
 
@@ -337,7 +330,7 @@ The experimental results support the hypothesis that recent historical prices an
 - Uses public WFP data instead of manually collected private data.
 - Provides a real product interface, not only a notebook.
 - Lightweight TypeScript inference avoids large Python ML dependencies in deployment.
-- Telegram support makes the model accessible through chat.
+- API routes make the same model available to the web interface and external clients.
 
 ### Limitations
 
@@ -354,7 +347,7 @@ The experimental results support the hypothesis that recent historical prices an
 - Compare additional models such as LightGBM, CatBoost, LSTM, or temporal deep learning models.
 - Schedule monthly retraining when new WFP data becomes available.
 - Improve the web app with clearer stale-data warnings and downloadable forecast summaries.
-- Add Khmer language support for the web interface and Telegram bot.
+- Add Khmer language support for the web interface.
 
 ---
 
@@ -364,7 +357,7 @@ This study developed a machine learning system for predicting Cambodia food pric
 
 The final XGBoost model achieved the best performance, with MAE of 0.1641 USD, RMSE of 0.3303 USD, and R2 of 0.9504 on a chronological held-out test set. These results show that the model can forecast food prices more accurately than a naive last-price baseline.
 
-The main contribution of this project is the complete pipeline from data science to product deployment. The trained model is exported into JSON and served through a Nuxt web application, API routes, and Telegram bot. This makes the forecast accessible to users without requiring them to open a dataset or run a notebook.
+The main contribution of this project is the complete pipeline from data science to product deployment. The trained model is exported into JSON and served through a Nuxt web application and API routes. This makes the forecast accessible to users without requiring them to open a dataset or run a notebook.
 
 Overall, the project demonstrates how public food price data can become a practical AI tool for market awareness, planning, and learning. The system is a credible forecasting prototype, while still requiring caution because predictions are estimates and not official market prices.
 
@@ -386,4 +379,4 @@ Overall, the project demonstrates how public food price data can become a practi
 
 [7] Nuxt Team, "Nuxt Documentation," Nuxt.
 
-[8] Telegram, "Telegram Bot API Documentation," Telegram.
+[8] Vercel, "Vercel Documentation," Vercel.
