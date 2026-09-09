@@ -1,3 +1,8 @@
 .claude/
 /ingestion/
 
+# Word temp/lock files
+~$*.docx
+*.bak
+*_new.docx
+
