@@ -1,7 +1,7 @@
 {
-  "datasetDate": "[2003-01-15T00:00:00 TO 2026-03-15T23:59:59]",
-  "resourceLastModified": "2026-10-04T15:38:24.378523",
-  "refreshedAt": "2026-10-05T14:11:17.602Z",
-  "rowsDownloaded": 87514,
-  "seriesEmitted": 3466
+  "datasetDate": "[2003-01-15T00:00:00 TO 2026-09-15T23:59:59]",
+  "resourceLastModified": "2026-10-11T15:22:00.840498",
+  "refreshedAt": "2026-10-12T15:00:02.019Z",
+  "rowsDownloaded": 91682,
+  "seriesEmitted": 3546
 }
